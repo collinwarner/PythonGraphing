@@ -1,25 +1,26 @@
 import matplotlib.pyplot as plt
 import random
 import math
-
+import numpy as np
 
 def convert_graph_to_plot(graph):
+    #O(n)
     plt.clf()
-    n = len(graph.nodes)
+    n = len(graph.nodes)+1
+    arc_seperation = 1
+    rads_per_node = 2*np.pi/n
+    r = 1/rads_per_node
     node_coords = {}
+    theta = 0
+    for node in graph.nodes:
+        x, y = r*np.cos(theta), r*np.sin(theta)
+        theta += rads_per_node
+        node_coords[node] = (x, y)
+        plt.plot(x, y, 'ro', color='black', markersize=20)
+        plt.text(x, y, node, color='white')
 
 
-    gen = (node for node in graph.nodes)
-    nroot = int(math.sqrt(n))+1
-    for x in range(1, nroot+1):
-        try:
-            for y in range(1, nroot):
-                node = next(gen)
-                node_coords[node] = (x, y)
-                plt.plot(x, y, 'ro', color='black', markersize=20)
-                plt.text(x, y, node, color='white')
-        except StopIteration:
-            break
+
 
 
 
@@ -27,6 +28,7 @@ def convert_graph_to_plot(graph):
         n1x, n1y = node_coords[edge[0]]
         n2x, n2y = node_coords[edge[1]]
         plt.plot([n1x, n2x], [n1y, n2y], "k")
+
     plt.tick_params(
         axis='x',  # changes apply to the x-axis
         which='both',  # both major and minor ticks are affected
@@ -40,8 +42,9 @@ def convert_graph_to_plot(graph):
         right=False,  # ticks along the top edge are off
         labelleft=False
     )
-    plt.xlim(0, nroot+1)
-    plt.ylim(0, nroot+1)
+
+    plt.xlim(-r-1, r+1)
+    plt.ylim(-r-1, r+1)
 
 
 def save_fig(g, filename):

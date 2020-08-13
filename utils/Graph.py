@@ -12,7 +12,7 @@ class Graph:
         for edge in edges:
             self.addEdge(edge)
             
-        for node in nodes:
+        for node in range(1, nodes+1):
             self.addNode(node)
 
             
