@@ -1,91 +1,65 @@
-import os
+from flask import Flask, render_template, request, redirect, url_for, session
+from utils import Graph, Visualize, random_graphs, path_finding
 
-from flask import Flask, render_template, request
+app = Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.secret_key = "some secret"
+@app.route("/")
+def home():
+    return render_template("home.html")
 
-from utils import Graph, Visualize
+@app.route("/index")
+def index():
+    return render_template("index.html")
 
-import random
+@app.route("/display", methods=["GET", "POST"])
+def display():
+    g = session.get("current_graph")
+    print(g)
+    g = Graph.convert_back(g)
+    print(repr(g))
+    filename = "static/graph_plots/inputPlot.png"
+    filename1 = "inputPlot.png"
+    shortest_path = None
+    if request.method == "POST" and g:
+        n1, n2 = tuple(map(int, request.form["node_pair"].strip().split(',')))
+        shortest_path = path_finding.shortest_path(g, n1, n2)
+        Visualize.save_fig(g, filename1, shortest_path)
 
-import glob
-
-glob_nodes = None
-glob_edges = None
-
-def create_app(test_config=None):
-    global glob_nodes
-    glob_nodes = None
-    global glob_edges
-    glob_edges = None
-    # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
-
-    TEST_FOLDER = os.path.join('static', 'graph_plots')
-    app.config['UPLOAD_FOLDER'] = TEST_FOLDER
-
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite')
-    )
-
-    if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
-    else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
-
-    #ensure the instance folder exists
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
-
-    @app.route('/default_graph')
-    def default_graph():
-        files = glob.glob(os.path.join(app.config['UPLOAD_FOLDER'], "*.png"))
-        for f in files:
-            os.remove(f)
-        if glob_nodes is not None and glob_edges is not None:
-            nodes = glob_nodes
-            edges = glob_edges
-        else:
-            nodes = [1, 2, 3, 4]
-            edges = [(1, 2), (2, 3), (3, 4), (4, 2)]
-
-        isDirected = False
-        g = Graph.Graph(nodes, edges, isDirected)
-        filename = "plot"+str(random.randint(0, 10000))+".png"
-
-        Visualize.save_fig(g, filename)
-
-        full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        return render_template("index.html", user_image=full_filename, graph_description=str(g))
+    return render_template("display.html", graph_img=filename, shortest_path=shortest_path)
 
 
-    from model import InputForm
+@app.route("/input", methods=["GET", "POST"])
+def input():
+    error = None
+    if request.method == "POST":
+        if "nodes" in request.form and "edges" in request.form and "isDirected" in request.form or "numNodes" in request.form:
+            if "numNodes" in request.form:
+                g = random_graphs.create_uniform_graph(int(request.form["numNodes"].strip()),
+                                                float(request.form["connectionProb"].strip()))
+            else:
+                nodes = int(request.form["nodes"].strip())
+                edges = [tuple(map(int, t.split(","))) for t in request.form["edges"].strip().split()]
+                isDirected = False if request.form["isDirected"].lower() == "false" else True
+                g = Graph.Graph(nodes, edges, isDirected)
+            session["current_graph"] = repr(g)
+            filename = "inputPlot.png"
+            Visualize.save_fig(g, filename)
+            return redirect(url_for("display"))
 
+    return render_template("input.html")
 
-    @app.route('/input', methods=['GET', 'POST'])
-    def index():
-        template_name = "my-form"
-        form = InputForm(request.form)
-        if request.method == 'POST' and form.validate():
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache"#, no-store, must-revalidate"
+    #r.headers["Pragma"] = "no-cache"
+    #r.headers["Expires"] = "0"
+    #r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
 
-            global glob_nodes
-            global glob_edges
-            nodes = list(map(int, form.nodes.data.split()))
-            edges = [tuple(map(int, t.split(","))) for t in form.edges.data.split()]
-
-            glob_nodes = nodes
-            glob_edges = edges
-        return render_template(template_name + '.html',
-                               form=form)
-    return app
-
-if __name__=="__main__":
-    create_app().run()
+if __name__ == "__main__":
+    app.run(debug=True)

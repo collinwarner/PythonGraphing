@@ -3,8 +3,13 @@ import random
 import math
 import numpy as np
 
-def convert_graph_to_plot(graph):
+def convert_graph_to_plot(graph, path):
     #O(n)
+    print(path)
+    path_convert = set()
+    if path:
+        path_convert = set([(path[i-1], path[i]) for i in range(1, len(path))])
+
     plt.clf()
     n = len(graph.nodes)+1
     arc_seperation = 1
@@ -23,11 +28,20 @@ def convert_graph_to_plot(graph):
 
 
 
-
     for edge in graph.edges:
         n1x, n1y = node_coords[edge[0]]
         n2x, n2y = node_coords[edge[1]]
-        plt.plot([n1x, n2x], [n1y, n2y], "k")
+        if edge in path_convert or (edge[1], edge[0]) in path_convert:
+            plt.plot([n1x, n2x], [n1y, n2y], "red")
+            if graph.isDirected:
+                dx, dy = (n2x - n1x)/2, (n2y - n1y)/2
+                plt.arrow(n1x, n1y, dx, dy, head_width=0.1, color="red")
+        else:
+            if graph.isDirected:
+                dx, dy = (n2x - n1x) / 2, (n2y - n1y) / 2
+                plt.arrow(n1x, n1y, dx, dy, head_width=0.1, color="k")
+            plt.plot([n1x, n2x], [n1y, n2y], "k")
+
 
     plt.tick_params(
         axis='x',  # changes apply to the x-axis
@@ -47,8 +61,8 @@ def convert_graph_to_plot(graph):
     plt.ylim(-r-1, r+1)
 
 
-def save_fig(g, filename):
-    convert_graph_to_plot(g)
+def save_fig(g, filename, path = []):
+    convert_graph_to_plot(g, path)
     plt.savefig("../flaskr/static/graph_plots/"+filename)
 
 if __name__=="__main__":

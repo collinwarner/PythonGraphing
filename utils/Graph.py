@@ -48,7 +48,7 @@ class Graph:
 
             
     def __repr__(self):
-        return f"Nodes {list(self.nodes.keys())}, Edges {list(self.edges)}"
+        return f"{list(self.nodes.keys())} / {list(self.edges)} / {self.isDirected}"
 
         
     def __str__(self):
@@ -60,3 +60,24 @@ class Graph:
 
         return res
 
+
+def convert_back(in_graph):
+    if in_graph:
+        nodes, edges, is_directed = in_graph.split("/")
+        print(is_directed)
+        nodes,edges = tokenizer(nodes), tokenizer(edges)
+        nodes = list(map(int, nodes.split()))
+        edges = list(map(int, edges.split()))
+        edges = [(edges[i - 1], edges[i]) for i in range(1, len(edges), 2)]
+        is_directed = True if is_directed.strip() == "True" else False
+        g = Graph(len(nodes), edges, is_directed)
+        print(g)
+        return g
+    return None
+def tokenizer(_input):
+    _input = _input.replace("[", "")
+    _input = _input.replace("]", "")
+    _input = _input.replace(",", "")
+    _input = _input.replace("(", "")
+    _input = _input.replace(")","")
+    return _input

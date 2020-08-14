@@ -1,5 +1,5 @@
 import random
-from Graph import Graph
+from utils.Graph import Graph
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors
@@ -12,7 +12,6 @@ def create_uniform_graph(n, connection_probability):
             if i !=j:
                 if random.random() < connection_probability:
                     edges.append((i,j))
-    print("found_edges")
     return Graph(n, edges, False)
 
 def get_degreeSequence(graph):

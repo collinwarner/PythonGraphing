@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Default Graph</title>
+</head>
+<body>
+
+
+
+    {% extends "template.html" %}
+    {% block content %}
+    <h1>Graph</h1>
+    <img src="{{ graph_img }}" alt="User Image" id="current_graph">
+
+    <form action="" method="post">
+        <label for="node pair">Find Shortest Path</label>
+        <input type="text" value="1, 1" id="node pair" name="node_pair">
+        <input type="submit" name="Find Path">
+    </form>
+    <p1 id = "short_path"> Shortest Path: {{shortest_path}}</p1>
+<br>
+    <button id="myButton" class="float-left submit-button" >New Graph</button>
+
+    <script type="text/javascript">
+    document.getElementById("myButton").onclick = function () {
+        location.href = "/input";
+    };
+    </script>
+
+    {% endblock %}
+
+
+</body>
+</html>

@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Default Graph</title>
-</head>
 <body>
-    <h1>Graph</h1>
-    <img src="{{ user_image }}" alt="User Image">
-    <br>
-    <p1> Graph Description </p1>
-    <br>
-    <p2>{{graph_description}} </p2>
+
+<h2>What Can JavaScript Do?</h2>
+
+<p id="demo">JavaScript can change HTML content.</p>
+
+<script src="{{ url_for('static',     filename='js/change_content.js') }}"></script>
+<button type="button" onclick=myFunction()>Click Me!</button>
+<button type="button" onclick="document.write(5+6)">Write</button>
+<button type="button" onclick="alert(5+6)">alert</button>
+<button type="button" onclick="console.log(5+6)">log</button>
+<button type="button" onclick="print()">Print</button>
+
 </body>
 </html>

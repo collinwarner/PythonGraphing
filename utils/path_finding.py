@@ -1,6 +1,6 @@
 def shortest_path(graph, n1, n2):
     if n1 not in graph.nodes or n2 not in graph.nodes:
-        return "Nodes not in Graph"
+        return None
 
     agenda = [(n1,)]
     visited = set()
